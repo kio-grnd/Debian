@@ -76,6 +76,15 @@ echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
 echo "options nouveau modeset=0" >> /etc/modprobe.d/blacklist.conf
 update-initramfs -u
 
+# Eliminar Plymouth si está instalado
+if dpkg -l | grep -q plymouth; then
+    echo "Eliminando Plymouth..."
+    apt remove --purge -y plymouth
+    update-initramfs -u
+else
+    echo "Plymouth no está instalado, no es necesario eliminarlo."
+fi
+
 # Reiniciar el sistema para aplicar los cambios
 echo "El sistema necesita reiniciarse para aplicar los cambios en el controlador nouveau."
 read -p "¿Quieres reiniciar ahora? (s/n): " -n 1 -r
