@@ -44,9 +44,10 @@ apt update && apt install -y \
 echo "Instalando Zsh y plugins..."
 apt install -y zsh zsh-syntax-highlighting zsh-autosuggestions
 
-# Configuración de sudo para el usuario "debian"
-echo "Configurando permisos de sudo para el usuario 'debian'..."
-echo "debian    ALL=(ALL:ALL) ALL" | sudo EDITOR='tee -a' visudo
+# Configuración de sudo para el usuario actual
+USER=$(logname)  # Obtener el nombre del usuario que ejecuta el script
+echo "Configurando permisos de sudo para el usuario '$USER'..."
+echo "$USER    ALL=(ALL:ALL) ALL" | sudo EDITOR='tee -a' visudo
 
 # Autoremove de AppArmor (si es necesario)
 echo "Eliminando AppArmor si está instalado..."
@@ -60,11 +61,11 @@ sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 # Activar NumLock al iniciar sesión
 echo "Activando NumLock al inicio..."
-echo "numlockx on" >> ~/.xinitrc
+echo "numlockx on" >> /home/$USER/.xinitrc
 
 # Configuración personalizada del teclado con setxkbmap para teclado español
 echo "Configurando el teclado con setxkbmap (teclado español)..."
-echo "setxkbmap -layout es" >> ~/.xinitrc
+echo "setxkbmap -layout es" >> /home/$USER/.xinitrc
 
 # Eliminar el controlador nouveau
 echo "Eliminando el controlador nouveau..."
@@ -176,25 +177,16 @@ if ${use_color} ; then
 else
 	PS1+='\u@\h \w \$ '
 fi
-
-for sh in /home/sid/.bashrc ; do
-	[[ -r ${sh} ]] && source "${sh}"
-done
-
-# Try to keep environment pollution down, EPA loves us.
-unset use_color sh
 EOF
 
 # Reiniciar el servicio console-setup
 echo "Reiniciando el servicio console-setup..."
 sudo service console-setup restart
 
-# Reemplazar la configuración de console-setup
+# Configuración de console-setup
 echo "Configurando console-setup..."
 cat <<EOF > /etc/default/console-setup
 # CONFIGURATION FILE FOR SETUPCON
-
-# Consult the console-setup(5) manual page.
 
 ACTIVE_CONSOLES="/dev/tty[1-6]"
 
@@ -206,9 +198,6 @@ FONTSIZE="8x16"
 
 VIDEOMODE=
 
-# The following is an example how to use a braille font
-# FONT='lat9w-08.psf.gz brl-8x8.psf'
-
 # Terminal colors
 USECOLOR="yes"
 EOF
@@ -217,7 +206,7 @@ EOF
 echo "Reiniciando el servicio console-setup..."
 sudo service console-setup restart
 
-# Reiniciar el sistema para aplicar los cambios
+# Reiniciar el sistema para aplicar los cambios en el controlador nouveau
 echo "El sistema necesita reiniciarse para aplicar los cambios en el controlador nouveau."
 read -p "¿Quieres reiniciar ahora? (s/n): " -n 1 -r
 echo    # Nueva línea
