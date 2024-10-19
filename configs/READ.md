@@ -35,3 +35,5 @@ Este archivo establece las siguientes características importantes:
 1. **Copia de seguridad del archivo existente**:
    ```bash
    sudo cp /etc/bash.bashrc /etc/bash.bashrc.bak
+
+   
