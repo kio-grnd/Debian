@@ -64,11 +64,7 @@ echo "numlockx on" >> ~/.xinitrc
 
 # Configuración personalizada del teclado con setxkbmap para teclado español
 echo "Configurando el teclado con setxkbmap (teclado español)..."
-# Configuración del teclado español
 echo "setxkbmap -layout es" >> ~/.xinitrc
-
-# Si deseas cambiar alguna tecla, puedes agregar más opciones. Ejemplo:
-# echo "setxkbmap -layout es -option caps:swapescape" >> ~/.xinitrc  # Ejemplo: cambiar Caps Lock por Escape
 
 # Eliminar el controlador nouveau
 echo "Eliminando el controlador nouveau..."
@@ -84,6 +80,34 @@ if dpkg -l | grep -q plymouth; then
 else
     echo "Plymouth no está instalado, no es necesario eliminarlo."
 fi
+
+# Reemplazar la configuración de console-setup
+echo "Configurando console-setup..."
+cat <<EOF > /etc/default/console-setup
+# CONFIGURATION FILE FOR SETUPCON
+
+# Consult the console-setup(5) manual page.
+
+ACTIVE_CONSOLES="/dev/tty[1-6]"
+
+CHARMAP="UTF-8"
+
+CODESET="Lat15"
+FONTFACE="VGA"
+FONTSIZE="8x16"
+
+VIDEOMODE=
+
+# The following is an example how to use a braille font
+# FONT='lat9w-08.psf.gz brl-8x8.psf'
+
+# Terminal colors
+USECOLOR="yes"
+EOF
+
+# Reiniciar el servicio console-setup
+echo "Reiniciando el servicio console-setup..."
+sudo service console-setup restart
 
 # Reiniciar el sistema para aplicar los cambios
 echo "El sistema necesita reiniciarse para aplicar los cambios en el controlador nouveau."
