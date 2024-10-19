@@ -70,8 +70,24 @@ echo "setxkbmap -layout es" >> ~/.xinitrc
 # Si deseas cambiar alguna tecla, puedes agregar más opciones. Ejemplo:
 # echo "setxkbmap -layout es -option caps:swapescape" >> ~/.xinitrc  # Ejemplo: cambiar Caps Lock por Escape
 
-# Configuración de la consola (comentada)
-# echo "Configurando la consola..."
-# sudo dpkg-reconfigure console-setup
+# Eliminar el controlador nouveau
+echo "Eliminando el controlador nouveau..."
+echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
+echo "options nouveau modeset=0" >> /etc/modprobe.d/blacklist.conf
+update-initramfs -u
 
-echo "Script completado."
+# Reiniciar el sistema para aplicar los cambios
+echo "El sistema necesita reiniciarse para aplicar los cambios en el controlador nouveau."
+read -p "¿Quieres reiniciar ahora? (s/n): " -n 1 -r
+echo    # Nueva línea
+if [[ $REPLY =~ ^[Ss]$ ]]; then
+    reboot
+fi
+
+# Instalar el controlador de NVIDIA
+echo "Instalando el controlador NVIDIA..."
+apt update
+apt install -y nvidia-driver
+
+# Reiniciar para aplicar los cambios
+echo "La instalación se ha completado. Por favor, reinicia el sistema."
