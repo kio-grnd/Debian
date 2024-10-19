@@ -26,23 +26,11 @@ apt update && apt install -y \
   chromium \
   flatpak \
   wmctrl \
-  snapd
 
-# Instalación de neovim mediante snap
-echo "Instalando neovim desde Snap..."
-sudo snap install nvim --classic
-
-# Configuración de flathub y instalación de Flatpaks
-echo "Añadiendo Flathub y instalando aplicaciones Flatpak..."
-sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-sudo flatpak install -y com.google.Chrome
-# Si prefieres Brave o Firefox, descomenta las siguientes líneas:
-# sudo flatpak install -y com.brave.Browser
-# sudo flatpak install -y org.mozilla.firefox
-
-# Copiar ufetch a /usr/bin y hacer que sea ejecutable
-# echo "Copiando ufetch a /usr/bin y dando permisos de ejecución..."
-# sudo cp /mnt/Linux/fetch/ufetch/ufetch-main/ufetch-debian /usr/bin/debfetch
-# sudo chmod +x /usr/bin/debfetch
+# Instalación de Google Chrome
+echo "Instalando Google Chrome..."
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome.deb
+apt install -y /tmp/google-chrome.deb
+rm /tmp/google-chrome.deb  # Limpiar el archivo .deb descargado
 
 echo "Script completado. ¡Disfruta tu entorno de bspwm!"
