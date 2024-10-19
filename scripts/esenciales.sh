@@ -220,4 +220,4 @@ apt update
 apt install -y nvidia-driver
 
 # Reiniciar para aplicar los cambios
-echo "La instalación se ha completado. Por favor, reinicia el sistema."
+echo -e "\e[1;31mLa instalación se ha completado. Por favor, reinicia el sistema.\e[0m"
