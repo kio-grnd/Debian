@@ -23,7 +23,7 @@ apt update && apt install -y \
   zathura \
   zathura-pdf-poppler \
   lxappearance \
-  chromium \
+  firefox \  # Reemplazado Chromium por Firefox
   flatpak \
   wmctrl \
 
