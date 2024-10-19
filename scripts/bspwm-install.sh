@@ -23,9 +23,9 @@ apt update && apt install -y \
   zathura \
   zathura-pdf-poppler \
   lxappearance \
-  firefox \  # Reemplazado Chromium por Firefox
   flatpak \
   wmctrl \
+  irssi
 
 # Instalación de Google Chrome
 echo "Instalando Google Chrome..."
