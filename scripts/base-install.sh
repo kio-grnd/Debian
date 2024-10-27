@@ -31,6 +31,7 @@ apt update && apt install -y \
   curl \
   unzip \
   gzip \
+  suckless-tools \
   wget \
   nano \
   libxinerama1 \
