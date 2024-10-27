@@ -53,26 +53,6 @@ echo "$USER    ALL=(ALL:ALL) ALL" | sudo EDITOR='tee -a' visudo
 echo "Eliminando AppArmor si está instalado..."
 apt autoremove -y apparmor
 
-# Configuración de OS Prober en GRUB
-echo "Habilitando OS Prober en GRUB..."
-sed -i '/GRUB_DISABLE_OS_PROBER=/d' /etc/default/grub
-echo 'GRUB_DISABLE_OS_PROBER="false"' >> /etc/default/grub
-sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-# Activar NumLock al iniciar sesión
-echo "Activando NumLock al inicio..."
-echo "numlockx on" >> /home/$USER/.xinitrc
-
-# Configuración personalizada del teclado con setxkbmap para teclado español
-echo "Configurando el teclado con setxkbmap (teclado español)..."
-echo "setxkbmap -layout es" >> /home/$USER/.xinitrc
-
-# Eliminar el controlador nouveau
-echo "Eliminando el controlador nouveau..."
-echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
-echo "options nouveau modeset=0" >> /etc/modprobe.d/blacklist.conf
-update-initramfs -u
-
 # Eliminar Plymouth si está instalado
 if dpkg -l | grep -q plymouth; then
     echo "Eliminando Plymouth..."
@@ -82,47 +62,39 @@ else
     echo "Plymouth no está instalado, no es necesario eliminarlo."
 fi
 
-# Reemplazar la configuración de /etc/bash.bashrc
+# Configuración de OS Prober en GRUB
+echo "Habilitando OS Prober en GRUB..."
+sed -i '/GRUB_DISABLE_OS_PROBER=/d' /etc/default/grub
+echo 'GRUB_DISABLE_OS_PROBER="false"' >> /etc/default/grub
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+# Eliminar el controlador nouveau
+echo "Eliminando el controlador nouveau..."
+echo "blacklist nouveau" >> /etc/modprobe.d/blacklist.conf
+echo "options nouveau modeset=0" >> /etc/modprobe.d/blacklist.conf
+update-initramfs -u
+
+# Activar NumLock al iniciar sesión
+echo "Activando NumLock al inicio..."
+echo "numlockx on" >> /home/$USER/.xinitrc
+
+# Configuración personalizada del teclado con setxkbmap para teclado español
+echo "Configurando el teclado con setxkbmap (teclado español)..."
+echo "setxkbmap -layout es" >> /home/$USER/.xinitrc
+
+# Configuración de /etc/bash.bashrc
 echo "Configurando /etc/bash.bashrc..."
 cat << 'EOF' > /etc/bash.bashrc
 # /etc/bash.bashrc
-#
-# This file is sourced by all *interactive* bash shells on startup,
-# including some apparently interactive shells such as scp and rcp
-# that can't tolerate any output.  So make sure this doesn't display
-# anything or bad things will happen !
-
-# Test for an interactive shell.  There is no need to set anything
-# past this point for scp and rcp, and it's important to refrain from
-# outputting anything in those cases.
+# Este archivo se carga en todos los shells bash interactivos al inicio.
 if [[ $- != *i* ]] ; then
-	# Shell is non-interactive.  Be done now!
 	return
 fi
-
-# Bash won't get SIGWINCH if another process is in the foreground.
-# Enable checkwinsize so that bash will check the terminal size when
-# it regains control.  #65623
-# http://cnswww.cns.cwru.edu/~chet/bash/FAQ (E11)
 shopt -s checkwinsize
-
-# Disable completion when the input buffer is empty.  i.e. Hitting tab
-# and waiting a long time for bash to expand all of $PATH.
 shopt -s no_empty_cmd_completion
-
-# Enable history appending instead of overwriting when exiting.  #139609
 shopt -s histappend
 
-# Save each command to the history file as it's executed.  #517342
-# This does mean sessions get interleaved when reading later on, but this
-# way the history is always up to date.  History is not synced across live
-# sessions though; that is what `history -n` does.
-# Disabled by default due to concerns related to system recovery when $HOME
-# is under duress, or lives somewhere flaky (like NFS).  Constantly syncing
-# the history will halt the shell prompt until it's finished.
-#PROMPT_COMMAND='history -a'
-
-# Change the window title of X terminals 
+# Cambiar el título de la ventana de los terminales X 
 case ${TERM} in
 	[aEkx]term*|rxvt*|gnome*|konsole*|interix)
 		PS1='\[\033]0;\u@\h:\w\007\]'
@@ -135,15 +107,9 @@ case ${TERM} in
 		;;
 esac
 
-# Set colorful PS1 only on colorful terminals.
-# dircolors --print-database uses its own built-in database
-# instead of using /etc/DIR_COLORS.  Try to use the external file
-# first to take advantage of user additions.
-# We run dircolors directly due to its changes in file syntax and
-# terminal name patching.
+# Configurar colores en el prompt
 use_color=false
 if type -P dircolors >/dev/null ; then
-	# Enable colors for ls, etc.  Prefer ~/.dir_colors #64489
 	LS_COLORS=
 	if [[ -f ~/.dir_colors ]] ; then
 		eval "$(dircolors -b ~/.dir_colors)"
@@ -159,7 +125,7 @@ if type -P dircolors >/dev/null ; then
 	fi
 else
 	case ${TERM} in
-	[aEkx]term*|rxvt*|gnome*|konsole*|screen|cons25|*color) use_color=true;;
+		[aEkx]term*|rxvt*|gnome*|konsole*|screen|cons25|*color) use_color=true;;
 	esac
 fi
 
@@ -179,26 +145,17 @@ else
 fi
 EOF
 
-# Reiniciar el servicio console-setup
-echo "Reiniciando el servicio console-setup..."
-sudo service console-setup restart
-
 # Configuración de console-setup
 echo "Configurando console-setup..."
 cat <<EOF > /etc/default/console-setup
 # CONFIGURATION FILE FOR SETUPCON
 
 ACTIVE_CONSOLES="/dev/tty[1-6]"
-
 CHARMAP="UTF-8"
-
 CODESET="Lat15"
 FONTFACE="VGA"
 FONTSIZE="8x16"
-
 VIDEOMODE=
-
-# Terminal colors
 USECOLOR="yes"
 EOF
 
@@ -206,7 +163,11 @@ EOF
 echo "Reiniciando el servicio console-setup..."
 sudo service console-setup restart
 
-# Reiniciar el sistema para aplicar los cambios en el controlador nouveau
+# Instalar el controlador de NVIDIA
+echo "Instalando el controlador NVIDIA..."
+apt install -y nvidia-driver
+
+# Reiniciar para aplicar los cambios
 echo "El sistema necesita reiniciarse para aplicar los cambios en el controlador nouveau."
 read -p "¿Quieres reiniciar ahora? (s/n): " -n 1 -r
 echo    # Nueva línea
@@ -214,10 +175,5 @@ if [[ $REPLY =~ ^[Ss]$ ]]; then
     reboot
 fi
 
-# Instalar el controlador de NVIDIA
-echo "Instalando el controlador NVIDIA..."
-apt update
-apt install -y nvidia-driver
-
-# Reiniciar para aplicar los cambios
+# Reiniciar el sistema para aplicar los cambios en el controlador nouveau
 echo -e "\e[1;31mLa instalación se ha completado. Por favor, reinicia el sistema.\e[0m"
