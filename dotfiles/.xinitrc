@@ -1,32 +1,37 @@
-# FLATPAK DBUS ERROR
-#eval $(dbus-launch --sh-syntax)
-#export DBUS_SESSION_BUS_ADDRESS
-#export DBUS_SESSION_BUS_PID
-
-# Iniciar el daemon de accesibilidad
-/usr/libexec/at-spi-bus-launcher &
-
+#
+# ~/.xinitrc
+#
+# Ejecutado por startx (inicia tu gestor de ventanas desde aquí)
 
 # Configuración del teclado
-setxkbmap es  # Cambia "es" por el código de tu idioma si es diferente
+setxkbmap es
 
-# Iniciar xbindkeys
+# Iniciar xbindkeys para gestionar atajos de teclado
 xbindkeys &
 
-# Activar NumLock
-numlockx on &  # Agrega esta línea para activar NumLock
+# Cargar configuraciones gráficas de X11 con xrdb y .Xresources
+xrdb -merge ~/.Xresources &
 
-# Para mostrar un cursor por defecto
+# Activar NumLock al inicio
+numlockx on &
+
+# Iniciar Picom para efectos de composición
+# picom &
+
+# (Opcional) Corregir el tearing en nVIDIA
+# ~/.local/bin/nvidia-fix-tearing.sh &
+
+# Iniciar Polybar
+polybar &
+
+# Establecer el cursor por defecto
 xsetroot -cursor_name left_ptr &
 
-# Para sonido con PipeWire
-pamixer &
+# Iniciar xmonad como gestor de ventanas
+# exec xmonad
 
-# nVIDIA fix-tearing
-# ~/scripts/nvidia-fix-tearing.sh &
+# Iniciar i3 como gestor de ventanas
+# exec i3
 
-# Lanzar sxhkd para atajos de teclado
-sxhkd &
-
-# Iniciar bspwm
-exec bspwm
+# Iniciar bspwm como gestor de ventanas
+# exec bspwm
